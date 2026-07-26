@@ -15,7 +15,8 @@
     "@astrojs/node": "^8.3.4",
     "@astrojs/vercel": "^7.8.2",
     "@supabase/supabase-js": "^2.45.4",
-    "astro": "^4.16.7"
+    "astro": "^4.16.7",
+    "ws": "^8.21.1"
   },
   "devDependencies": {
     "@astrojs/tailwind": "^5.1.2",
