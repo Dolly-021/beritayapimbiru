@@ -1,0 +1,10 @@
+{
+  "framework": "astro",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "functions": {
+    "dist/server/entry.mjs": {
+      "runtime": "nodejs20.x"
+    }
+  }
+}
