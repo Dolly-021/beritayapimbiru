@@ -1,5 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import type { AstroCookies } from 'astro';
+import ws from 'ws';
+
+if (typeof window === 'undefined' && !globalThis.WebSocket) {
+  globalThis.WebSocket = ws as any;
+}
 
 const url = import.meta.env.PUBLIC_SUPABASE_URL;
 const anonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
