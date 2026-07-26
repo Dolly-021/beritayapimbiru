@@ -1,7 +1,7 @@
-# Portal Sekolah — Astro + Supabase
+# Portal Sekolah — Astro 
 
 Landing page profil & berita sekolah, dengan 2 peran pengguna:
-- **Client** (pengunjung publik) — tidak perlu login, hanya bisa melihat halaman utama dan berita yang sudah dipublikasikan.
+- **Client** (pengunjung cpublik) — tidak perlu login, hanya bisa melihat halaman utama dan berita yang sudah dipublikasikan.
 - **Admin** — login di `/admin/login`, bisa menambah/mengubah/menghapus berita dan mengubah pengaturan situs (kontak, info PPDB, dll) di `/admin`.
 
 ## Struktur Peran
