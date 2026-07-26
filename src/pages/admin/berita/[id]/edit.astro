@@ -1,0 +1,43 @@
+---
+export const prerender = false;
+import Layout from '../../../../layouts/Layout.astro';
+import FormBerita from '../../../../components/FormBerita.astro';
+import { supabaseServer } from '../../../../lib/supabase';
+
+const { id } = Astro.params;
+const error = Astro.url.searchParams.get('error');
+
+const client = await supabaseServer(Astro.cookies);
+const { data: berita } = await client.from('berita').select('*').eq('id', id).single();
+
+if (!berita) {
+  return Astro.redirect('/admin?sukses=Berita+tidak+ditemukan');
+}
+---
+<Layout title="Ubah Berita — Panel Admin">
+  <div class="min-h-screen bg-brand-50">
+    <header class="bg-white border-b border-brand-100">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 py-5">
+        <a href="/admin" class="text-sm text-ink/50 hover:text-brand-600">&larr; Kembali ke Dashboard</a>
+        <h1 class="font-display font-extrabold text-2xl mt-1">Ubah Berita</h1>
+      </div>
+    </header>
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+      <FormBerita
+        action="/api/berita/update"
+        submitLabel="Simpan Perubahan"
+        error={error}
+        data={{
+          id: berita.id,
+          judul: berita.judul,
+          kategori: berita.kategori,
+          ringkasan: berita.ringkasan,
+          konten: berita.konten,
+          thumbnail_url: berita.thumbnail_url,
+          published: berita.published,
+          tanggal: berita.tanggal,
+        }}
+      />
+    </main>
+  </div>
+</Layout>

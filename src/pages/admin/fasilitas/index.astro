@@ -1,0 +1,89 @@
+---
+export const prerender = false;
+import Layout from '../../../layouts/Layout.astro';
+import { supabaseServer } from '../../../lib/supabase';
+
+const client = await supabaseServer(Astro.cookies);
+const { data: fasilitas } = await client
+  .from('fasilitas')
+  .select('*')
+  .order('urutan', { ascending: true });
+
+const sukses = Astro.url.searchParams.get('sukses');
+const error = Astro.url.searchParams.get('error');
+---
+<Layout title="Kelola Fasilitas — Panel Admin">
+  <div class="min-h-screen bg-brand-50">
+    <header class="bg-white border-b border-brand-100 sticky top-0 z-10">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+        <div>
+          <a href="/admin" class="text-xs text-ink/50 hover:text-brand-600">&larr; Kembali ke Dashboard Admin</a>
+          <p class="font-display font-extrabold text-xl mt-0.5">Kelola Fasilitas Sekolah</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="/admin/fasilitas/new" class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-4 py-2 rounded-xl transition-colors text-sm">
+            <i class="fa-solid fa-plus"></i> Tambah Fasilitas
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      {sukses && (
+        <p class="text-sm bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg px-4 py-2.5 mb-6">{sukses}</p>
+      )}
+      {error && (
+        <p class="text-sm bg-red-50 text-red-600 border border-red-100 rounded-lg px-4 py-2.5 mb-6">{error}</p>
+      )}
+
+      <div class="bg-white rounded-2xl border border-brand-100 overflow-hidden shadow-sm">
+        {(!fasilitas || fasilitas.length === 0) ? (
+          <div class="text-center py-14 px-4">
+            <i class="fa-solid fa-building text-4xl text-brand-300 mb-3 block"></i>
+            <p class="text-ink/60 font-medium">Belum ada fasilitas yang ditambahkan.</p>
+            <p class="text-xs text-ink/40 mt-1">Klik tombol "Tambah Fasilitas" untuk memasukkan data fasilitas baru.</p>
+          </div>
+        ) : (
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-brand-50 text-ink/60 text-left">
+                <tr>
+                  <th class="px-5 py-3.5 font-semibold">Gambar / Icon</th>
+                  <th class="px-5 py-3.5 font-semibold">Judul Fasilitas</th>
+                  <th class="px-5 py-3.5 font-semibold">Deskripsi</th>
+                  <th class="px-5 py-3.5 font-semibold">Urutan</th>
+                  <th class="px-5 py-3.5 font-semibold text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-brand-50">
+                {fasilitas.map((item) => (
+                  <tr class="hover:bg-brand-50/50 transition-colors">
+                    <td class="px-5 py-3.5">
+                      {item.gambar_url ? (
+                        <img src={item.gambar_url} alt={item.judul} class="w-14 h-10 object-cover rounded-lg border border-brand-100" />
+                      ) : (
+                        <div class="w-10 h-10 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold">
+                          <i class={`fa-solid fa-${item.icon || 'building'}`}></i>
+                        </div>
+                      )}
+                    </td>
+                    <td class="px-5 py-3.5 font-bold text-ink">{item.judul}</td>
+                    <td class="px-5 py-3.5 text-ink/70 max-w-xs truncate">{item.deskripsi}</td>
+                    <td class="px-5 py-3.5 text-ink/60 font-mono">{item.urutan}</td>
+                    <td class="px-5 py-3.5 text-right space-x-3 whitespace-nowrap">
+                      <a href={`/admin/fasilitas/${item.id}/edit`} class="text-brand-600 hover:underline font-semibold">Edit</a>
+                      <form method="POST" action="/api/fasilitas/delete" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus fasilitas ini?')">
+                        <input type="hidden" name="id" value={item.id} />
+                        <button type="submit" class="text-red-500 hover:underline font-semibold">Hapus</button>
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </main>
+  </div>
+</Layout>

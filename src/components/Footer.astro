@@ -1,0 +1,66 @@
+---
+export interface Props {
+  namaSekolah: string;
+  alamat: string;
+  whatsapp: string;
+  telepon: string;
+  email: string;
+}
+const { namaSekolah, alamat, whatsapp, telepon, email } = Astro.props;
+---
+<footer id="kontak" class="bg-ink text-white/80 pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl2 bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
+            <i class="fa-solid fa-graduation-cap text-white"></i>
+          </div>
+          <p class="font-display font-extrabold text-white">{namaSekolah}</p>
+        </div>
+        <p class="text-sm leading-relaxed text-white/60">
+          Sekolah menengah atas swasta terakreditasi A yang berfokus pada pembentukan karakter dan kesiapan akademik siswa.
+        </p>
+        <div class="flex gap-3 mt-5">
+          <a href="#" aria-label="Instagram" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-brand-500 flex items-center justify-center transition-colors"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" aria-label="YouTube" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-brand-500 flex items-center justify-center transition-colors"><i class="fa-brands fa-youtube"></i></a>
+          <a href="#" aria-label="Facebook" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-brand-500 flex items-center justify-center transition-colors"><i class="fa-brands fa-facebook-f"></i></a>
+        </div>
+      </div>
+
+      <div>
+        <p class="font-display font-bold text-white mb-4">Navigasi</p>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="#beranda" class="hover:text-white transition-colors">Beranda</a></li>
+          <li><a href="#profil" class="hover:text-white transition-colors">Profil Sekolah</a></li>
+          <li><a href="#berita" class="hover:text-white transition-colors">Berita &amp; Kegiatan</a></li>
+          <li><a href="#fasilitas" class="hover:text-white transition-colors">Fasilitas</a></li>
+          <li><a href="#ppdb" class="hover:text-white transition-colors">Pendaftaran PPDB</a></li>
+          <li><a href="/admin/login" class="hover:text-white transition-colors">Login Admin</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="font-display font-bold text-white mb-4">Kontak</p>
+        <ul class="space-y-3 text-sm">
+          <li class="flex items-start gap-3"><i class="fa-solid fa-location-dot mt-1 text-brand-400"></i><span>{alamat}</span></li>
+          <li class="flex items-center gap-3"><i class="fa-brands fa-whatsapp text-brand-400"></i><a href={`https://wa.me/${whatsapp}`} class="hover:text-white transition-colors">+{whatsapp}</a></li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-brand-400"></i><a href={`tel:${telepon}`} class="hover:text-white transition-colors">{telepon}</a></li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-envelope text-brand-400"></i><a href={`mailto:${email}`} class="hover:text-white transition-colors">{email}</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="font-display font-bold text-white mb-4">Lokasi</p>
+        <div class="rounded-xl2 overflow-hidden border border-white/10 h-40">
+          <iframe title="Peta lokasi sekolah" src={`https://www.google.com/maps?q=${encodeURIComponent(alamat)}&output=embed`} class="w-full h-full grayscale-[30%]" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-white/10 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/40">
+      <p>&copy; {new Date().getFullYear()} {namaSekolah}. Seluruh hak cipta dilindungi.</p>
+      <p>Dibuat dengan <i class="fa-solid fa-heart text-brand-500"></i> untuk pendidikan Indonesia.</p>
+    </div>
+  </div>
+</footer>

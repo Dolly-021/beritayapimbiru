@@ -1,0 +1,274 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import NewsGrid from '../components/NewsGrid.astro';
+import Footer from '../components/Footer.astro';
+import ChatWidget from '../components/ChatWidget.astro';
+import { supabase } from '../lib/supabase';
+
+// Data publik: hanya berita published (dibatasi RLS) + pengaturan situs.
+const { data: berita } = await supabase
+  .from('berita')
+  .select('id, judul, slug, ringkasan, kategori, thumbnail_url, tanggal')
+  .eq('published', true)
+  .order('tanggal', { ascending: false });
+
+const { data: pengaturan } = await supabase
+  .from('pengaturan_situs')
+  .select('*')
+  .eq('id', 1)
+  .single();
+
+const site = pengaturan ?? {
+  nama_sekolah: 'SMK YAPIM BIRU-BIRU',
+  tagline: 'Terakreditasi A · Medan ',
+  alamat: 'JL. BESAR DELITUA, LANTAI I DESA SIDOMULYO BIRU-BIRU, Kec. Sibiru-biru, Kab. Deli Serdang, Prov. Sumatera Utara.',
+  whatsapp: '6281234567890',
+  telepon: '(061) 123-4567',
+  email: 'info@smkyapim.sch.id',
+  gelombang_ppdb_teks: 'Selalu Terbuka untuk Pendaftaran Siswa Baru',
+  link_form_ppdb: '#',
+};
+
+// Data fasilitas dari database Supabase
+const { data: dbFasilitas } = await supabase
+  .from('fasilitas')
+  .select('*')
+  .order('urutan', { ascending: true });
+
+const defaultFasilitas = [
+  { icon: 'flask-vial', judul: 'Laboratorium STEM', deskripsi: 'Ruang praktikum yang mendorong siswa mencoba, mengamati, dan membangun solusi nyata.', gambar_url: null },
+  { icon: 'book-open-reader', judul: 'Perpustakaan Digital', deskripsi: 'Akses literasi, riset, dan sumber belajar yang mendukung pola pikir kritis.', gambar_url: null },
+  { icon: 'computer', judul: 'Kelas Kreatif Digital', deskripsi: 'Belajar coding, desain, hingga presentasi modern dalam satu ekosistem yang terarah.', gambar_url: null },
+];
+
+const listFasilitas = (dbFasilitas && dbFasilitas.length > 0) ? dbFasilitas : defaultFasilitas;
+
+const statistik = [
+  { angka: '40+', label: 'Prestasi tingkat kota & nasional' },
+  { angka: '30', label: 'Rata-rata siswa per kelas' },
+  { angka: '98%', label: 'Kepuasan orang tua terhadap layanan sekolah' },
+];
+---
+<Layout title={`${site.nama_sekolah} — Sekolah Unggul, Masa Depan Cerah`}>
+  <Header namaSekolah={site.nama_sekolah} tagline={site.tagline} />
+
+  <main id="main">
+    <!-- HERO -->
+    <section id="beranda" class="relative pt-28 md:pt-36 pb-20 md:pb-28 overflow-hidden">
+      <div class="absolute inset-0 -z-10 bg-gradient-to-b from-brand-100/70 via-brand-50 to-brand-50"></div>
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-brand-300/30 rounded-full blur-3xl -z-10"></div>
+      <div class="absolute -bottom-16 left-0 w-72 h-72 bg-sky-200/40 rounded-full blur-3xl -z-10"></div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
+        <div class="reveal-on-scroll">
+          <span class="inline-flex items-center gap-2 bg-white text-brand-700 text-xs font-semibold px-4 py-2 rounded-full shadow-sm border border-brand-100">
+            <i class="fa-solid fa-circle-check text-brand-500"></i> {site.gelombang_ppdb_teks}
+          </span>
+          <h1 class="font-display font-extrabold text-4xl sm:text-5xl xl:text-6xl leading-[1.08] mt-5 tracking-tight">
+            Tempat Tumbuh untuk <span class="text-brand-600">Pikiran yang Ingin Tahu</span>
+          </h1>
+          <p class="mt-5 text-base sm:text-lg text-ink/70 max-w-xl leading-relaxed">
+            {site.nama_sekolah} memadukan kurikulum akademik yang kuat dengan ruang untuk bereksplorasi — supaya setiap siswa berangkat dari sini dengan arah, bukan sekadar nilai.
+          </p>
+          <div class="mt-8 flex flex-col sm:flex-row gap-3">
+            <a href={site.link_form_ppdb} class="inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3.5 rounded-xl shadow-lg shadow-brand-500/30 hover:-translate-y-0.5 transition-all">
+              Daftar PPDB Sekarang <i class="fa-solid fa-arrow-right text-sm"></i>
+            </a>
+            <a href="#profil" class="inline-flex items-center justify-center gap-2 bg-white hover:bg-brand-50 text-brand-700 font-semibold px-6 py-3.5 rounded-xl border border-brand-200 transition-all">
+              Kenali Sekolah Kami
+            </a>
+          </div>
+          <div class="mt-8 grid sm:grid-cols-3 gap-3">
+            {statistik.map((item) => (
+              <div class="rounded-2xl border border-brand-100 bg-white/80 px-4 py-3 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
+                <p class="font-display font-extrabold text-2xl text-brand-700">{item.angka}</p>
+                <p class="text-xs text-ink/65 mt-1 leading-relaxed">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div class="relative reveal-on-scroll">
+          <div class="absolute -inset-4 bg-gradient-to-br from-brand-200/40 to-sky-200/40 rounded-[2rem] blur-2xl -z-10"></div>
+          <div class="relative rounded-[2rem] overflow-hidden shadow-2xl shadow-brand-500/20 border-8 border-white group">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQH7p_YW3dq-5ICvJBjxU2-JUgPB6585_NfOwDPeNA9TA&s=10" alt="Siswa berdiskusi di halaman sekolah" class="w-full h-[340px] sm:h-[420px] object-cover transition-transform duration-700 group-hover:scale-105">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+              <div class="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm px-3 py-1 text-xs font-semibold border border-white/20">
+                <i class="fa-solid fa-award"></i> Pembelajaran yang memacu potensi siswa
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFIL -->
+    <section id="profil" class="py-20 md:py-28 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl reveal-on-scroll">
+          <span class="text-brand-600 font-semibold text-sm tracking-wide uppercase">Profil Sekolah</span>
+          <h2 class="font-display font-extrabold text-3xl sm:text-4xl mt-3 tracking-tight">Dibangun di Atas Tiga Hal yang Kami Yakini</h2>
+          <p class="mt-4 text-ink/70 leading-relaxed">
+            Visi kami: menjadi sekolah menengah yang melahirkan generasi berpikir kritis, berkarakter, dan siap bersaing secara global.
+          </p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-14">
+          {[
+            { icon: 'book-open', title: 'Kurikulum Merdeka Terpadu', desc: 'Kombinasi kurikulum nasional dengan program peminatan STEM dan literasi digital.' },
+            { icon: 'users', title: 'Rasio Guru & Siswa Ideal', desc: '1 pengajar untuk maksimal 18 siswa per kelas, bimbingan yang benar-benar personal.' },
+            { icon: 'medal', title: 'Jejak Prestasi Konsisten', desc: '40+ penghargaan tingkat kota hingga nasional dalam tiga tahun meyakinkan.' },
+          ].map((item) => (
+            <div class="reveal-on-scroll bg-brand-50 rounded-xl2 p-7 border border-brand-100 hover:shadow-xl hover:-translate-y-1 transition-all group">
+              <div class="w-12 h-12 rounded-xl bg-brand-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                <i class={`fa-solid fa-${item.icon} text-white`}></i>
+              </div>
+              <h3 class="font-display font-bold text-lg">{item.title}</h3>
+              <p class="text-sm text-ink/65 mt-2 leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- FASILITAS (HORIZONTAL SCROLL / SLIDER) -->
+    <section id="fasilitas" class="py-20 md:py-28 bg-gradient-to-b from-brand-50 to-white overflow-hidden">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 reveal-on-scroll">
+          <div class="max-w-2xl">
+            <span class="text-brand-600 font-semibold text-sm tracking-wide uppercase">Fasilitas & Pengalaman Belajar</span>
+            <h2 class="font-display font-extrabold text-3xl sm:text-4xl mt-3 tracking-tight">Lingkungan yang Menyokong Potensi Tiap Siswa</h2>
+          </div>
+          <div class="flex items-center gap-3 self-end">
+            <button id="fasilitas-prev" aria-label="Geser kiri" class="w-12 h-12 rounded-full border border-brand-200 bg-white text-ink/70 hover:bg-brand-600 hover:text-white hover:border-brand-600 transition-all flex items-center justify-center shadow-sm">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <button id="fasilitas-next" aria-label="Geser kanan" class="w-12 h-12 rounded-full border border-brand-200 bg-white text-ink/70 hover:bg-brand-600 hover:text-white hover:border-brand-600 transition-all flex items-center justify-center shadow-sm">
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Horizontal Scroll Container -->
+        <div id="fasilitas-container" class="flex gap-6 mt-12 overflow-x-auto no-scrollbar scrollbar-none scroll-smooth pb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
+
+          {listFasilitas.map((item) => (
+            <div class="reveal-on-scroll flex-none w-[300px] sm:w-[360px] group rounded-[1.5rem] bg-white border border-brand-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden flex flex-col">
+              {item.gambar_url ? (
+                <div class="h-48 w-full overflow-hidden bg-brand-100 relative">
+                  <img src={item.gambar_url} alt={item.judul} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                </div>
+              ) : (
+                <div class="h-48 w-full bg-gradient-to-br from-brand-100 to-sky-100 flex items-center justify-center text-brand-600">
+                  <div class="w-16 h-16 rounded-2xl bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <i class={`fa-solid fa-${item.icon || 'building'} text-2xl`}></i>
+                  </div>
+                </div>
+              )}
+              <div class="p-6 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 class="font-display font-bold text-lg text-ink group-hover:text-brand-600 transition-colors">{item.judul}</h3>
+                  <p class="text-sm text-ink/65 mt-2 leading-relaxed">{item.deskripsi}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+
+    <NewsGrid berita={berita ?? []} />
+
+    <!-- PPDB CTA -->
+    <section id="ppdb" class="py-20 md:py-24 relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-br from-brand-600 to-brand-700 -z-10"></div>
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <span class="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-4 py-2 rounded-full border border-white/20">
+          <i class="fa-solid fa-calendar-days"></i> {site.gelombang_ppdb_teks}
+        </span>
+        <h2 class="font-display font-extrabold text-white text-3xl sm:text-4xl md:text-5xl mt-6 tracking-tight leading-tight">
+          Langkah Pertama Menuju Masa Depan Anak Anda
+        </h2>
+        <div class="mt-9 flex flex-col sm:flex-row gap-3 justify-center">
+          <a href={site.link_form_ppdb} class="inline-flex items-center justify-center gap-2 bg-white text-brand-700 font-bold px-7 py-3.5 rounded-xl shadow-xl hover:-translate-y-0.5 transition-all">
+            <i class="fa-solid fa-pen-to-square"></i> Isi Formulir PPDB
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer namaSekolah={site.nama_sekolah} alamat={site.alamat} whatsapp={site.whatsapp} telepon={site.telepon} email={site.email} />
+  <ChatWidget whatsapp={site.whatsapp} alamat={site.alamat} />
+</Layout>
+
+<script>
+  const revealItems = document.querySelectorAll<HTMLElement>('.reveal-on-scroll');
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  revealItems.forEach((item) => revealObserver.observe(item));
+
+  // Fasilitas Horizontal Slider Navigation & Auto-Play
+  const container = document.getElementById('fasilitas-container');
+  const prevBtn = document.getElementById('fasilitas-prev');
+  const nextBtn = document.getElementById('fasilitas-next');
+
+  if (container && prevBtn && nextBtn) {
+    const scrollAmount = 380;
+    let autoScrollTimer: any = null;
+
+    const scrollNext = () => {
+      // Jika sudah mendekati batas paling kanan, reset scroll kembali ke awal (kiri)
+      if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+        container.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    };
+
+    const scrollPrev = () => {
+      if (container.scrollLeft <= 0) {
+        container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
+      } else {
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      }
+    };
+
+    const startAutoScroll = () => {
+      stopAutoScroll();
+      autoScrollTimer = setInterval(scrollNext, 3500); // Bergerak otomatis setiap 3.5 detik
+    };
+
+    const stopAutoScroll = () => {
+      if (autoScrollTimer) clearInterval(autoScrollTimer);
+    };
+
+    prevBtn.addEventListener('click', () => {
+      scrollPrev();
+      startAutoScroll();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      scrollNext();
+      startAutoScroll();
+    });
+
+    // Jeda otomatis jika mouse diarahkan/disentuh pada slider
+    container.addEventListener('mouseenter', stopAutoScroll);
+    container.addEventListener('mouseleave', startAutoScroll);
+    container.addEventListener('touchstart', stopAutoScroll, { passive: true });
+    container.addEventListener('touchend', startAutoScroll, { passive: true });
+
+    // Jalankan auto-scroll pertama kali
+    startAutoScroll();
+  }
+
+</script>
+

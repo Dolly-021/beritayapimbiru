@@ -1,0 +1,131 @@
+---
+export interface Berita {
+  id: string;
+  judul: string;
+  slug: string;
+  ringkasan: string;
+  kategori: 'prestasi' | 'pengumuman' | 'ekstrakurikuler';
+  thumbnail_url: string | null;
+  tanggal: string;
+}
+export interface Props { berita: Berita[] }
+const { berita } = Astro.props;
+
+const badgeClass: Record<string, string> = {
+  prestasi: 'bg-amber-500/15 text-amber-600',
+  pengumuman: 'bg-brand-100 text-brand-700',
+  ekstrakurikuler: 'bg-emerald-500/15 text-emerald-600',
+};
+const pinColor: Record<string, string> = {
+  prestasi: '#F59E0B',
+  pengumuman: '#3B82F6',
+  ekstrakurikuler: '#10B981',
+};
+const labelKategori: Record<string, string> = {
+  prestasi: 'Prestasi',
+  pengumuman: 'Pengumuman',
+  ekstrakurikuler: 'Ekstrakurikuler',
+};
+
+function formatTanggal(iso: string) {
+  return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+---
+<section id="berita" class="py-20 md:py-28 cork-texture">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+      <div class="max-w-xl">
+        <span class="text-brand-600 font-semibold text-sm tracking-wide uppercase">Papan Pengumuman</span>
+        <h2 class="font-display font-extrabold text-3xl sm:text-4xl mt-3 tracking-tight">Berita &amp; Kegiatan Terbaru</h2>
+        <p class="mt-3 text-ink/70">Kabar terbaru dari lingkungan sekolah — dikelola langsung oleh admin.</p>
+      </div>
+      <div id="filterGroup" class="flex flex-wrap gap-2">
+        <button data-filter="semua" class="filter-btn active-filter px-4 py-2 rounded-full text-sm font-semibold border transition-all">Semua</button>
+        <button data-filter="prestasi" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold border transition-all">Prestasi</button>
+        <button data-filter="pengumuman" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold border transition-all">Pengumuman</button>
+        <button data-filter="ekstrakurikuler" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold border transition-all">Ekstrakurikuler</button>
+      </div>
+    </div>
+
+    {berita.length === 0 ? (
+      <p class="text-center text-ink/50 mt-14">Belum ada berita yang dipublikasikan. Silakan tambahkan lewat panel admin.</p>
+    ) : (
+      <div id="newsGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-14">
+        {berita.map((item) => (
+          <article data-category={item.kategori} class="news-card pin-card bg-white rounded-xl2 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden">
+            <a href={`/berita/${item.slug}`} class="block" style={`--pin-color:${pinColor[item.kategori]}`}>
+              <div class="tape"></div>
+              {item.thumbnail_url && (
+                <img src={item.thumbnail_url} alt={item.judul} class="w-full h-44 object-cover" loading="lazy">
+              )}
+              <div class="p-6">
+                <div class="flex items-center gap-3 text-xs text-ink/50 mb-3">
+                  <span class={`font-semibold px-2.5 py-1 rounded-full ${badgeClass[item.kategori]}`}>{labelKategori[item.kategori]}</span>
+                  <time datetime={item.tanggal}>{formatTanggal(item.tanggal)}</time>
+                </div>
+                <h3 class="font-display font-bold text-lg leading-snug hover:text-brand-600 transition-colors">{item.judul}</h3>
+                <p class="text-sm text-ink/65 mt-2 leading-relaxed">{item.ringkasan}</p>
+                <span class="inline-flex items-center gap-1.5 text-brand-600 font-semibold text-sm mt-4">Baca selengkapnya <i class="fa-solid fa-arrow-right text-xs"></i></span>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+    )}
+    <p id="emptyState" class="hidden text-center text-ink/50 mt-14">Belum ada berita pada kategori ini.</p>
+  </div>
+</section>
+
+<style>
+  .pin-card { position: relative; }
+  .pin-card::before {
+    content: ""; position: absolute; top: -10px; left: 22px; width: 20px; height: 20px;
+    background: var(--pin-color, #3B82F6); border-radius: 9999px;
+    box-shadow: 0 3px 6px rgba(30,41,59,0.25), inset 0 -2px 3px rgba(0,0,0,0.15); z-index: 10;
+  }
+  .tape {
+    position: absolute; top: -14px; right: 18px; width: 64px; height: 26px;
+    background: rgba(147, 197, 253, 0.55); transform: rotate(4deg); box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  }
+  .cork-texture {
+    background-color: #EFF6FF;
+    background-image: radial-gradient(#DBEAFE 1.2px, transparent 1.2px), radial-gradient(#DBEAFE 1.2px, transparent 1.2px);
+    background-size: 26px 26px; background-position: 0 0, 13px 13px;
+  }
+</style>
+
+<script>
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+  const newsCards = document.querySelectorAll<HTMLElement>('.news-card');
+  const emptyState = document.getElementById('emptyState');
+
+  function styleFilterButtons() {
+    filterBtns.forEach((btn) => {
+      if (btn.classList.contains('active-filter')) {
+        btn.classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+        btn.classList.remove('bg-white', 'text-ink/70', 'border-brand-200');
+      } else {
+        btn.classList.add('bg-white', 'text-ink/70', 'border-brand-200');
+        btn.classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+      }
+    });
+  }
+  styleFilterButtons();
+
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach((b) => b.classList.remove('active-filter'));
+      btn.classList.add('active-filter');
+      styleFilterButtons();
+
+      const filter = btn.dataset.filter;
+      let visibleCount = 0;
+      newsCards.forEach((card) => {
+        const match = filter === 'semua' || card.dataset.category === filter;
+        card.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+      });
+      emptyState?.classList.toggle('hidden', visibleCount !== 0);
+    });
+  });
+</script>

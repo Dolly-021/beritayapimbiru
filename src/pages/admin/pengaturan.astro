@@ -1,0 +1,65 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import { supabaseServer } from '../../lib/supabase';
+
+const client = await supabaseServer(Astro.cookies);
+const { data: site } = await client.from('pengaturan_situs').select('*').eq('id', 1).single();
+
+const sukses = Astro.url.searchParams.get('sukses');
+const error = Astro.url.searchParams.get('error');
+---
+<Layout title="Pengaturan Situs — Panel Admin">
+  <div class="min-h-screen bg-brand-50">
+    <header class="bg-white border-b border-brand-100">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 py-5">
+        <a href="/admin" class="text-sm text-ink/50 hover:text-brand-600">&larr; Kembali ke Dashboard</a>
+        <h1 class="font-display font-extrabold text-2xl mt-1">Pengaturan Situs</h1>
+        <p class="text-sm text-ink/50 mt-1">Ubah info sekolah, kontak, dan status PPDB yang tampil di halaman utama.</p>
+      </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+      {sukses && <p class="text-sm bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg px-4 py-2.5 mb-6">{sukses}</p>}
+      {error && <p class="text-sm bg-red-50 text-red-600 border border-red-100 rounded-lg px-4 py-2.5 mb-6">{error}</p>}
+
+      <form method="POST" action="/api/pengaturan/update" class="space-y-5 bg-white rounded-2xl border border-brand-100 p-6 sm:p-8">
+        <div>
+          <label for="nama_sekolah" class="text-sm font-medium text-ink/70">Nama Sekolah</label>
+          <input id="nama_sekolah" name="nama_sekolah" type="text" value={site?.nama_sekolah} class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 text-sm">
+        </div>
+        <div>
+          <label for="tagline" class="text-sm font-medium text-ink/70">Tagline (di sebelah logo)</label>
+          <input id="tagline" name="tagline" type="text" value={site?.tagline} class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 text-sm">
+        </div>
+        <div>
+          <label for="alamat" class="text-sm font-medium text-ink/70">Alamat</label>
+          <input id="alamat" name="alamat" type="text" value={site?.alamat} class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 text-sm">
+        </div>
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div>
+            <label for="whatsapp" class="text-sm font-medium text-ink/70">Nomor WhatsApp (format: 628xxxx)</label>
+            <input id="whatsapp" name="whatsapp" type="text" value={site?.whatsapp} class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 text-sm">
+          </div>
+          <div>
+            <label for="telepon" class="text-sm font-medium text-ink/70">Telepon Kantor</label>
+            <input id="telepon" name="telepon" type="text" value={site?.telepon} class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 text-sm">
+          </div>
+        </div>
+        <div>
+          <label for="email" class="text-sm font-medium text-ink/70">Email</label>
+          <input id="email" name="email" type="email" value={site?.email} class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 text-sm">
+        </div>
+        <div>
+          <label for="gelombang_ppdb_teks" class="text-sm font-medium text-ink/70">Teks Info Gelombang PPDB</label>
+          <input id="gelombang_ppdb_teks" name="gelombang_ppdb_teks" type="text" value={site?.gelombang_ppdb_teks} class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 text-sm">
+        </div>
+        <div>
+          <label for="link_form_ppdb" class="text-sm font-medium text-ink/70">Link Formulir Pendaftaran PPDB</label>
+          <input id="link_form_ppdb" name="link_form_ppdb" type="url" value={site?.link_form_ppdb} class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 text-sm">
+        </div>
+        <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">Simpan Pengaturan</button>
+      </form>
+    </main>
+  </div>
+</Layout>

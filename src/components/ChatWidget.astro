@@ -1,0 +1,96 @@
+---
+export interface Props { whatsapp: string; alamat: string }
+const { whatsapp, alamat } = Astro.props;
+---
+<div id="chatWidget" class="fixed bottom-5 right-5 z-50 flex flex-col items-end" data-whatsapp={whatsapp} data-alamat={alamat}>
+  <div id="chatPanel" class="hidden mb-4 w-[88vw] max-w-sm h-[420px] bg-white rounded-2xl shadow-2xl border border-brand-100 flex flex-col overflow-hidden">
+    <div class="bg-brand-600 text-white px-5 py-4 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"><i class="fa-solid fa-robot"></i></div>
+      <div>
+        <p class="font-semibold text-sm">Asisten Sekolah</p>
+        <p class="text-[11px] text-brand-50/80">Siap bantu info sekolah &amp; PPDB</p>
+      </div>
+      <button id="closeChat" aria-label="Tutup chat" class="ml-auto w-8 h-8 rounded-lg hover:bg-white/15 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="chatBody" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-brand-50/50">
+      <div class="bg-white rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm shadow-sm max-w-[80%] leading-relaxed">
+        Halo! 👋 Ada yang bisa saya bantu seputar profil sekolah, PPDB, atau fasilitas?
+      </div>
+    </div>
+    <div class="p-3 border-t border-brand-100 bg-white">
+      <div class="flex flex-wrap gap-2 mb-2">
+        <button class="quick-q text-xs bg-brand-50 hover:bg-brand-100 text-brand-700 px-3 py-1.5 rounded-full transition-colors">Cara daftar PPDB?</button>
+        <button class="quick-q text-xs bg-brand-50 hover:bg-brand-100 text-brand-700 px-3 py-1.5 rounded-full transition-colors">Alamat sekolah?</button>
+      </div>
+      <form id="chatForm" class="flex items-center gap-2">
+        <input id="chatInput" type="text" placeholder="Tulis pertanyaan..." class="flex-1 text-sm px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-400" autocomplete="off">
+        <button type="submit" aria-label="Kirim pesan" class="w-10 h-10 shrink-0 rounded-xl bg-brand-600 hover:bg-brand-700 text-white flex items-center justify-center transition-colors"><i class="fa-solid fa-paper-plane text-sm"></i></button>
+      </form>
+    </div>
+  </div>
+  <button id="chatToggle" aria-label="Buka asisten chat" class="w-16 h-16 rounded-full bg-brand-600 hover:bg-brand-700 text-white shadow-xl shadow-brand-500/40 flex items-center justify-center transition-transform hover:scale-105">
+    <i class="fa-solid fa-comment-dots text-2xl" id="chatToggleIcon"></i>
+  </button>
+</div>
+
+<script>
+  const widget = document.getElementById('chatWidget');
+  const waNumber = widget?.dataset.whatsapp || '';
+  const alamat = widget?.dataset.alamat || '';
+
+  const chatToggle = document.getElementById('chatToggle');
+  const chatToggleIcon = document.getElementById('chatToggleIcon');
+  const chatPanel = document.getElementById('chatPanel');
+  const closeChat = document.getElementById('closeChat');
+  const chatForm = document.getElementById('chatForm') as HTMLFormElement | null;
+  const chatInput = document.getElementById('chatInput') as HTMLInputElement | null;
+  const chatBody = document.getElementById('chatBody');
+
+  function toggleChat(forceOpen?: boolean) {
+    const willOpen = forceOpen !== undefined ? forceOpen : chatPanel?.classList.contains('hidden');
+    chatPanel?.classList.toggle('hidden', !willOpen);
+    if (chatToggleIcon) chatToggleIcon.className = willOpen ? 'fa-solid fa-xmark text-2xl' : 'fa-solid fa-comment-dots text-2xl';
+    if (willOpen) chatInput?.focus();
+  }
+  chatToggle?.addEventListener('click', () => toggleChat());
+  closeChat?.addEventListener('click', () => toggleChat(false));
+
+  function addBubble(text: string, fromUser: boolean) {
+    const bubble = document.createElement('div');
+    bubble.className = 'rounded-2xl px-4 py-2.5 text-sm shadow-sm max-w-[80%] leading-relaxed ' +
+      (fromUser ? 'bg-brand-600 text-white rounded-tr-sm ml-auto' : 'bg-white rounded-tl-sm');
+    bubble.textContent = text;
+    chatBody?.appendChild(bubble);
+    if (chatBody) chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function botReply(userText: string) {
+    const q = userText.toLowerCase();
+    let reply = `Terima kasih atas pertanyaannya! Untuk info lebih detail, silakan hubungi kami via WhatsApp di +${waNumber}.`;
+    if (q.includes('daftar') || q.includes('ppdb')) {
+      reply = 'Klik tombol "Isi Formulir PPDB" pada banner PPDB di halaman ini untuk mendaftar.';
+    } else if (q.includes('alamat') || q.includes('lokasi') || q.includes('dimana')) {
+      reply = `Kami berlokasi di ${alamat}.`;
+    } else if (q.includes('biaya') || q.includes('spp')) {
+      reply = 'Rincian biaya akan dikirim setelah Anda mengisi formulir PPDB, atau hubungi kami langsung via WhatsApp.';
+    }
+    setTimeout(() => addBubble(reply, false), 500);
+  }
+
+  chatForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = chatInput?.value.trim();
+    if (!text) return;
+    addBubble(text, true);
+    if (chatInput) chatInput.value = '';
+    botReply(text);
+  });
+
+  document.querySelectorAll('.quick-q').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const text = btn.textContent || '';
+      addBubble(text, true);
+      botReply(text);
+    });
+  });
+</script>

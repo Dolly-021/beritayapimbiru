@@ -1,0 +1,35 @@
+---
+import Layout from '../../layouts/Layout.astro';
+const error = Astro.url.searchParams.get('error');
+---
+<Layout title="Login Admin — Portal Sekolah">
+  <div class="min-h-screen flex items-center justify-center bg-brand-50 px-4">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl border border-brand-100 p-8">
+      <div class="w-12 h-12 rounded-xl2 bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center mb-5">
+        <i class="fa-solid fa-lock text-white"></i>
+      </div>
+      <h1 class="font-display font-extrabold text-2xl">Login Admin</h1>
+      <p class="text-sm text-ink/60 mt-1 mb-6">Khusus untuk pengelola website sekolah.</p>
+
+      {error && (
+        <p class="text-sm bg-red-50 text-red-600 border border-red-100 rounded-lg px-3 py-2 mb-4">
+          Email atau kata sandi salah. Silakan coba lagi.
+        </p>
+      )}
+
+      <form method="POST" action="/api/auth/login" class="space-y-4">
+        <div>
+          <label for="email" class="text-sm font-medium text-ink/70">Email</label>
+          <input id="email" name="email" type="email" required class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-400 text-sm">
+        </div>
+        <div>
+          <label for="password" class="text-sm font-medium text-ink/70">Kata Sandi</label>
+          <input id="password" name="password" type="password" required class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-400 text-sm">
+        </div>
+        <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-xl transition-colors">Masuk</button>
+      </form>
+
+      <a href="/" class="block text-center text-xs text-ink/50 hover:text-brand-600 mt-6">← Kembali ke halaman utama</a>
+    </div>
+  </div>
+</Layout>

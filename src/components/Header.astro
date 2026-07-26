@@ -1,0 +1,73 @@
+---
+export interface Props {
+  namaSekolah: string;
+  tagline: string;
+}
+const { namaSekolah, tagline } = Astro.props;
+---
+<header id="header" class="fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-brand-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 md:h-[72px]">
+      <a href="#beranda" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 md:w-11 md:h-11 rounded-xl2 bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-md shadow-brand-500/30 group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-graduation-cap text-white text-lg md:text-xl"></i>
+        </div>
+        <div class="leading-tight">
+          <p class="font-display font-extrabold text-ink text-[15px] md:text-base tracking-tight">{namaSekolah}</p>
+          <p class="text-[11px] md:text-xs text-brand-600 font-medium -mt-0.5">{tagline}</p>
+        </div>
+      </a>
+
+      <nav class="hidden lg:flex items-center gap-8 font-medium text-sm text-ink/80">
+        <a href="#beranda" class="hover:text-brand-600 transition-colors">Beranda</a>
+        <a href="#profil" class="hover:text-brand-600 transition-colors">Profil</a>
+        <a href="#berita" class="hover:text-brand-600 transition-colors">Berita</a>
+        <a href="#fasilitas" class="hover:text-brand-600 transition-colors">Fasilitas</a>
+        <a href="#kontak" class="hover:text-brand-600 transition-colors">Kontak</a>
+      </nav>
+
+      <div class="flex items-center gap-2 md:gap-3">
+        <a href="#ppdb" class="hidden sm:inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 md:px-5 py-2.5 rounded-xl shadow-md shadow-brand-500/30 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+          <i class="fa-solid fa-pen-to-square text-xs"></i> Pendaftaran PPDB
+        </a>
+        <button id="menuBtn" aria-label="Buka menu navigasi" aria-expanded="false" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+          <i class="fa-solid fa-bars text-lg" id="menuIcon"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mobileMenu" class="lg:hidden hidden border-t border-brand-100 bg-white">
+    <nav class="flex flex-col px-4 py-3 gap-1 font-medium text-sm">
+      <a href="#beranda" class="nav-mobile-link px-3 py-2.5 rounded-lg hover:bg-brand-50">Beranda</a>
+      <a href="#profil" class="nav-mobile-link px-3 py-2.5 rounded-lg hover:bg-brand-50">Profil</a>
+      <a href="#berita" class="nav-mobile-link px-3 py-2.5 rounded-lg hover:bg-brand-50">Berita</a>
+      <a href="#fasilitas" class="nav-mobile-link px-3 py-2.5 rounded-lg hover:bg-brand-50">Fasilitas</a>
+      <a href="#kontak" class="nav-mobile-link px-3 py-2.5 rounded-lg hover:bg-brand-50">Kontak</a>
+      <a href="#ppdb" class="mt-2 text-center bg-brand-600 text-white font-semibold px-4 py-2.5 rounded-xl">Pendaftaran PPDB</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const menuIcon = document.getElementById('menuIcon');
+  menuBtn?.addEventListener('click', () => {
+    const isHidden = mobileMenu?.classList.contains('hidden');
+    mobileMenu?.classList.toggle('hidden');
+    menuBtn.setAttribute('aria-expanded', String(isHidden));
+    if (menuIcon) menuIcon.className = isHidden ? 'fa-solid fa-xmark text-lg' : 'fa-solid fa-bars text-lg';
+  });
+  document.querySelectorAll('.nav-mobile-link').forEach((a) => {
+    a.addEventListener('click', () => {
+      mobileMenu?.classList.add('hidden');
+      menuBtn?.setAttribute('aria-expanded', 'false');
+      if (menuIcon) menuIcon.className = 'fa-solid fa-bars text-lg';
+    });
+  });
+  window.addEventListener('scroll', () => {
+    const header = document.getElementById('header');
+    header?.classList.toggle('shadow-md', window.scrollY > 8);
+  });
+</script>

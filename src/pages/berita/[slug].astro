@@ -1,0 +1,114 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import ChatWidget from '../../components/ChatWidget.astro';
+import { supabase } from '../../lib/supabase';
+
+const { slug } = Astro.params;
+
+const { data: berita } = await supabase
+  .from('berita')
+  .select('*')
+  .eq('slug', slug)
+  .eq('published', true)
+  .single();
+
+if (!berita) {
+  return Astro.redirect('/404');
+}
+
+const { data: pengaturan } = await supabase.from('pengaturan_situs').select('*').eq('id', 1).single();
+const site = pengaturan ?? {
+  nama_sekolah: 'SMA Cendekia Nusantara',
+  tagline: 'Terakreditasi A · Medan',
+  alamat: 'Jl. Pendidikan Raya No. 45, Medan, Sumatera Utara 20112',
+  whatsapp: '6281234567890',
+  telepon: '(061) 123-4567',
+  email: 'info@cendekianusantara.sch.id',
+};
+
+const labelKategori: Record<string, string> = {
+  prestasi: 'Prestasi',
+  pengumuman: 'Pengumuman',
+  ekstrakurikuler: 'Ekstrakurikuler',
+};
+const badgeClass: Record<string, string> = {
+  prestasi: 'bg-amber-500/15 text-amber-600',
+  pengumuman: 'bg-brand-100 text-brand-700',
+  ekstrakurikuler: 'bg-emerald-500/15 text-emerald-600',
+};
+
+const tanggalFormatted = new Date(berita.tanggal).toLocaleDateString('id-ID', {
+  day: 'numeric', month: 'long', year: 'numeric',
+});
+
+// Ambil beberapa berita lain sebagai rekomendasi bacaan lanjutan
+const { data: beritaLain } = await supabase
+  .from('berita')
+  .select('judul, slug, kategori, tanggal, thumbnail_url')
+  .eq('published', true)
+  .neq('slug', slug)
+  .order('tanggal', { ascending: false })
+  .limit(3);
+---
+<Layout title={`${berita.judul} — ${site.nama_sekolah}`} description={berita.ringkasan}>
+  <Header namaSekolah={site.nama_sekolah} tagline={site.tagline} />
+
+  <main class="pt-28 md:pt-36 pb-20">
+    <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <a href="/#berita" class="inline-flex items-center gap-2 text-sm text-brand-600 font-semibold hover:gap-3 transition-all mb-6">
+        <i class="fa-solid fa-arrow-left text-xs"></i> Kembali ke Berita
+      </a>
+
+      <div class="flex items-center gap-3 text-xs text-ink/50 mb-4">
+        <span class={`font-semibold px-2.5 py-1 rounded-full ${badgeClass[berita.kategori]}`}>{labelKategori[berita.kategori]}</span>
+        <time datetime={berita.tanggal}>{tanggalFormatted}</time>
+      </div>
+
+      <h1 class="font-display font-extrabold text-3xl sm:text-4xl leading-tight tracking-tight">{berita.judul}</h1>
+      <p class="text-ink/60 mt-3 text-lg leading-relaxed">{berita.ringkasan}</p>
+
+      {berita.thumbnail_url && (
+        <div class="flex justify-center mt-8">
+          <img src={berita.thumbnail_url} alt={berita.judul} class="block max-w-full h-auto rounded-2xl shadow-lg">
+        </div>
+      )}
+
+      <div class="prose prose-slate max-w-none mt-8 text-ink/80 leading-relaxed whitespace-pre-line">
+        {berita.konten}
+      </div>
+
+      <div class="flex items-center gap-3 mt-10 pt-6 border-t border-brand-100">
+        <p class="text-sm font-medium text-ink/50">Bagikan:</p>
+        <a href={`https://wa.me/?text=${encodeURIComponent(berita.judul + ' - ' + Astro.url.href)}`} target="_blank" rel="noopener" class="w-9 h-9 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-600 flex items-center justify-center transition-colors">
+          <i class="fa-brands fa-whatsapp"></i>
+        </a>
+        <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.url.href)}`} target="_blank" rel="noopener" class="w-9 h-9 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-600 flex items-center justify-center transition-colors">
+          <i class="fa-brands fa-facebook-f"></i>
+        </a>
+      </div>
+    </article>
+
+    {beritaLain && beritaLain.length > 0 && (
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+        <h2 class="font-display font-bold text-xl mb-6">Berita Lainnya</h2>
+        <div class="grid sm:grid-cols-3 gap-6">
+          {beritaLain.map((item) => (
+            <a href={`/berita/${item.slug}`} class="block bg-white rounded-xl2 border border-brand-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all">
+              {item.thumbnail_url && <img src={item.thumbnail_url} alt={item.judul} class="w-full h-32 object-cover">}
+              <div class="p-4">
+                <span class={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${badgeClass[item.kategori]}`}>{labelKategori[item.kategori]}</span>
+                <h3 class="font-display font-bold text-sm mt-2 leading-snug">{item.judul}</h3>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+  </main>
+
+  <Footer namaSekolah={site.nama_sekolah} alamat={site.alamat} whatsapp={site.whatsapp} telepon={site.telepon} email={site.email} />
+  <ChatWidget whatsapp={site.whatsapp} alamat={site.alamat} />
+</Layout>

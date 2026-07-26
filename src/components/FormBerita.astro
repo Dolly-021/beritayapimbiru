@@ -1,0 +1,80 @@
+---
+export interface Props {
+  action: string;
+  submitLabel: string;
+  error?: string | null;
+  data?: {
+    id?: string;
+    judul?: string;
+    kategori?: string;
+    ringkasan?: string;
+    konten?: string;
+    thumbnail_url?: string | null;
+    published?: boolean;
+    tanggal?: string;
+  };
+}
+const { action, submitLabel, error, data = {} } = Astro.props;
+const tanggalDefault = data.tanggal ?? new Date().toISOString().slice(0, 10);
+---
+<form method="POST" action={action} enctype="multipart/form-data" class="space-y-5 bg-white rounded-2xl border border-brand-100 p-6 sm:p-8">
+  {error && (
+    <p class="text-sm bg-red-50 text-red-600 border border-red-100 rounded-lg px-3 py-2">{error}</p>
+  )}
+
+  {data.id && <input type="hidden" name="id" value={data.id} />}
+
+  <div>
+    <label for="judul" class="text-sm font-medium text-ink/70">Judul Berita</label>
+    <input id="judul" name="judul" type="text" required value={data.judul ?? ''} class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-400 text-sm">
+  </div>
+
+  <div class="grid sm:grid-cols-2 gap-5">
+    <div>
+      <label for="kategori" class="text-sm font-medium text-ink/70">Kategori</label>
+      <select id="kategori" name="kategori" class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-400 text-sm">
+        <option value="pengumuman" selected={data.kategori === 'pengumuman'}>Pengumuman</option>
+        <option value="prestasi" selected={data.kategori === 'prestasi'}>Prestasi</option>
+        <option value="ekstrakurikuler" selected={data.kategori === 'ekstrakurikuler'}>Ekstrakurikuler</option>
+      </select>
+    </div>
+    <div>
+      <label for="tanggal" class="text-sm font-medium text-ink/70">Tanggal</label>
+      <input id="tanggal" name="tanggal" type="date" value={tanggalDefault} class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-400 text-sm">
+    </div>
+  </div>
+
+  <div>
+    <label for="thumbnail_file" class="text-sm font-medium text-ink/70">Gambar Thumbnail</label>
+    {data.thumbnail_url && (
+      <div class="mt-2 mb-3">
+        <img src={data.thumbnail_url} alt="Thumbnail saat ini" class="w-40 h-24 object-cover rounded-lg border border-brand-100">
+        <p class="text-xs text-ink/40 mt-1">Gambar saat ini. Pilih file baru di bawah untuk menggantinya.</p>
+      </div>
+    )}
+    <input id="thumbnail_file" name="thumbnail_file" type="file" accept="image/*" class="mt-1 w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-brand-100 file:text-brand-700 file:font-semibold hover:file:bg-brand-200 file:cursor-pointer">
+    <p class="text-xs text-ink/40 mt-1">Format JPG/PNG/WebP, maksimal 5MB. Diunggah otomatis ke Supabase Storage.</p>
+    <input type="hidden" name="thumbnail_url_lama" value={data.thumbnail_url ?? ''} />
+  </div>
+
+  <div>
+    <label for="ringkasan" class="text-sm font-medium text-ink/70">Ringkasan Singkat</label>
+    <textarea id="ringkasan" name="ringkasan" rows="2" required class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-400 text-sm">{data.ringkasan ?? ''}</textarea>
+    <p class="text-xs text-ink/40 mt-1">Ditampilkan di kartu berita pada halaman utama.</p>
+  </div>
+
+  <div>
+    <label for="konten" class="text-sm font-medium text-ink/70">Isi Berita Lengkap</label>
+    <textarea id="konten" name="konten" rows="8" required class="mt-1 w-full px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-400 text-sm">{data.konten ?? ''}</textarea>
+  </div>
+
+  <label class="flex items-center gap-2.5 text-sm font-medium text-ink/70">
+    <input type="checkbox" name="published" checked={data.published ?? true} class="w-4 h-4 rounded border-brand-200 text-brand-600 focus:ring-brand-400">
+    Publikasikan sekarang (tampil di halaman utama)
+  </label>
+
+  <div class="flex items-center gap-3 pt-2">
+    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors text-sm">{submitLabel}</button>
+    <a href="/admin" class="text-sm text-ink/50 hover:text-ink font-medium">Batal</a>
+  </div>
+</form>
